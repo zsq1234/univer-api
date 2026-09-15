@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Offline Univer Facade API reference" />
+    <title>Univer API Reference</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">LOCAL · VERSION-MATCHED · STRUCTURED</p>
+        <h1>Univer API Reference</h1>
+        <p>Find Facade APIs or inspect exact declarations directly in your browser.</p>
+      </header>
+      <form id="query-form">
+        <label>
+          Operation
+          <select id="action">
+            <option value="find">Find</option>
+            <option value="show">Show</option>
+          </select>
+        </label>
+        <label class="query-field">
+          Query
+          <textarea id="query" rows="4" spellcheck="false"></textarea>
+        </label>
+        <label>
+          Unit
+          <select id="unit">
+            <option value="">All units</option>
+            <option value="sheet">Sheet</option>
+            <option value="slide">Slide</option>
+            <option value="doc">Doc</option>
+            <option value="base">Base</option>
+            <option value="board">Board</option>
+          </select>
+        </label>
+        <label>
+          Limit
+          <input id="limit" type="number" min="1" value="25" />
+        </label>
+        <button type="submit">Run query</button>
+      </form>
+      <section aria-live="polite">
+        <div class="result-heading">
+          <h2>Unified response</h2>
+          <span id="status"></span>
+        </div>
+        <pre id="output"></pre>
+      </section>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
