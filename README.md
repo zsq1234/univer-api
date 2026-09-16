@@ -1,13 +1,14 @@
 # univer-api
 
-`univer-api` exposes the version-matched Univer Facade API reference in three environments without
+`univer-api` exposes the version-matched Univer Facade API reference through four adapters without
 using `@univer-cli/api-reference-command`:
 
 - a browser page that queries the reference locally;
 - a Node.js HTTP server;
-- a dependency-light CLI adapter.
+- a dependency-light CLI adapter;
+- an MCP server over Streamable HTTP or stdin/stdout (`stdio`).
 
-All three adapters call `executeApiQuery()` and return one `univer-api-response/v1` JSON envelope.
+All four adapters call `executeApiQuery()` and return one `univer-api-response/v1` JSON envelope.
 The only reference dependency is `@univer-cli/api-reference@1.0.0-rc.0`.
 
 ## Setup
@@ -128,18 +129,67 @@ univer-api show FRange.setValues
 Queries always emit exactly one JSON document to stdout. Invalid arguments exit with code 2;
 reference or missing-symbol failures exit with code 1.
 
+## MCP server
+
+The MCP server exposes two read-only tools backed by the same API reference:
+
+- `univer_api_find` searches for API symbols by `terms`, with optional `unit` and `limit`;
+- `univer_api_show` returns full definitions for exact `symbols`.
+
+Use the standard stdin/stdout transport (the default) from an MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "univer-api": {
+      "command": "univer-api-mcp"
+    }
+  }
+}
+```
+
+For local development without installing the bin:
+
+```bash
+pnpm mcp
+```
+
+`--transport stdout` is accepted as an alias for `stdio`. Stdout is reserved exclusively for MCP
+JSON-RPC messages; diagnostics are written to stderr.
+
+Start a stateless Streamable HTTP server at `http://127.0.0.1:3001/mcp`:
+
+```bash
+univer-api-mcp --transport http
+# or during development
+pnpm mcp:http --host 127.0.0.1 --port 3001 --path /mcp
+```
+
+`MCP_HOST` and `MCP_PORT` provide the HTTP defaults. The server binds to loopback by default; add
+authentication or an authenticated reverse proxy before exposing it outside a trusted machine.
+
+Programmatic use is available from the dedicated Node.js export so browser bundles stay free of
+MCP server dependencies:
+
+```ts
+import { createUniverMcpServer, startMcpHttpServer } from "univer-api/mcp";
+
+const mcp = createUniverMcpServer();
+const httpServer = await startMcpHttpServer({ port: 3001 });
+```
+
 ## Architecture
 
 ```text
 @univer-cli/api-reference
              |
        executeApiQuery
-       /      |      \
- browser   HTTP     CLI
- page      server   process
-       \      |      /
+       /      |      |       \
+ browser   HTTP     CLI      MCP
+ page      server   process  HTTP/stdio
+       \      |      |       /
    univer-api-response/v1
 ```
 
 `src/core.ts` owns validation, reference invocation, error mapping, summaries, and serialization.
-The browser, server, and CLI files contain transport-specific parsing only.
+The browser, HTTP server, CLI, and MCP files contain transport-specific parsing only.

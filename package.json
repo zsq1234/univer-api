@@ -5,7 +5,8 @@
   "description": "One Univer Facade API reference contract for browsers, Node.js servers, and CLIs.",
   "type": "module",
   "bin": {
-    "univer-api": "./dist/node/cli.js"
+    "univer-api": "./dist/node/cli.js",
+    "univer-api-mcp": "./dist/node/mcp-cli.js"
   },
   "exports": {
     ".": {
@@ -16,6 +17,10 @@
     "./server": {
       "types": "./dist/types/server.d.ts",
       "import": "./dist/node/server.js"
+    },
+    "./mcp": {
+      "types": "./dist/types/mcp.d.ts",
+      "import": "./dist/node/mcp.js"
     }
   },
   "files": [
@@ -27,12 +32,16 @@
     "check": "pnpm typecheck && pnpm test && pnpm build",
     "cli": "tsx src/cli.ts",
     "dev": "tsx watch src/server.ts",
+    "mcp": "node --import tsx src/mcp-cli.ts",
+    "mcp:http": "node --import tsx src/mcp-cli.ts --transport http",
     "server": "node dist/node/server.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@univer-cli/api-reference": "1.0.0-rc.0"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@univer-cli/api-reference": "1.0.0-rc.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
